@@ -1,0 +1,20 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../confir/Sequlize.js');
+
+const userData = sequelize.define('users', {
+
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  password:{
+    type: DataTypes.STRING,
+    allowNull: false,
+  }
+});
+
+module.exports = userData;
