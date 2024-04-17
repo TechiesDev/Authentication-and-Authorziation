@@ -1,15 +1,19 @@
 const express = require('express');
 const userController = require('../controllers/UserController.js');
+const authorization = require('../middleware/Authorization.js');
 const router = express.Router();
 
 router.post('/usersign', userController.UserRegistration);
 router.post('/userlogin', userController.UserLogin);
 
+
+// Protected routes requiring authorization middleware
+router.get('/user/:id', authorization, userController.getUserById);
+router.put('/user/:id', authorization, userController.updateUser);
+router.delete('/user/:id', authorization, userController.deleteUser);
+
 router.get('/user', userController.HomeController);
 
-// Protected routes requiring authentication middleware
-router.get('/user/:id', userController.authenticateToken, userController.getUserById);
-router.put('/user/:id', userController.authenticateToken, userController.updateUser);
-router.delete('/user/:id', userController.authenticateToken, userController.deleteUser);
+
 
 module.exports = router;
