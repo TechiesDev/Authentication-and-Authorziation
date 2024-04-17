@@ -2,7 +2,7 @@ const express = require("express");
 const userRoutes = require("./routes/UserRoutes.js");
 const sequelize = require("./confir/Sequlize.js");
 const cookieParser = require('cookie-parser'); 
-
+require('dotenv').config();
 const port = 8080;
 
 

@@ -1,10 +1,10 @@
 const { where } = require("sequelize");
 const userData = require("../model/UserModel.js");
 const jwt = require("jsonwebtoken");
-const tokentext = "qwerty";
+
 
 const createToken = (user) => {
-  return jwt.sign({ userId: user._id }, tokentext, { expiresIn: "1h" });
+  return jwt.sign({ userId: user._id }, process.env.secreateKey, { expiresIn: "1h" });
 };
 
 
@@ -81,21 +81,7 @@ const deleteUser = async (req, res) => {
   }}
   
 
-  const authenticateToken = (req, res, next) => {
-    const token = req.cookies.token; 
-    if (!token) {
-      return res.status(401).json({ error: "Unauthorized: No token provided" });
-    }
-  
-    jwt.verify(token, tokentext, (err, user) => {
-      if (err) {
-        return res.status(403).json({ error: "Unauthorized: Invalid token" });
-      }
-      req.user = user;
-      next();
-    });
-  };
-  
+ 
 
   
-  module.exports = { UserRegistration, UserLogin,HomeController,getUserById,updateUser,deleteUser,authenticateToken };
+  module.exports = { UserRegistration, UserLogin,HomeController,getUserById,updateUser,deleteUser};
