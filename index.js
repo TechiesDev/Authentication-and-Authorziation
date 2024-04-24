@@ -1,14 +1,14 @@
 const express = require("express");
 const userRoutes = require("./routes/UserRoutes.js");
-const sequelize = require("./confir/Sequlize.js");
-const cookieParser = require('cookie-parser'); 
-require('dotenv').config();
-const port = 8080;
-
-
+const sequelize = require("./config/Sequlize.js");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+require("dotenv").config();
+const port = process.env.PORT;
 
 const app = express();
-app.use(cookieParser()); 
+app.use(cookieParser());
+app.use(bodyParser.json());
 
 const path = require("path");
 const { I18n } = require("i18n");
@@ -35,4 +35,3 @@ sequelize
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
