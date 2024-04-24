@@ -5,7 +5,7 @@ const router = express.Router();
 const passwordController = require("../controllers/Forget&ResetController.js");
 
 router.post("/usersign", userController.UserRegistration);
-router.post("/userlogin", userController.UserLogin);
+router.post("/login", userController.UserLogin);
 
 // Protected routes requiring authorization middleware
 router.get("/user/:id", authorization, userController.getUserById);

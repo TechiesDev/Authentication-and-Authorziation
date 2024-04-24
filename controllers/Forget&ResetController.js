@@ -1,9 +1,11 @@
 // passwordController.js
 
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const userData = require("../model/UserModel"); // Assuming you have a user model
-const Mailgen  = require("mailgen"); // Import Mailgen
+const Mailgen = require("mailgen"); // Import Mailgen
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
@@ -55,15 +57,9 @@ const generateResetPasswordMail = (email, otp) => {
 };
 
 const sendMail = async (mailOptions) => {
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
-    return info;
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw new Error("Failed to send email");
-  }
+  return transporter.sendMail(mailOptions);
 };
+
 
 const forgetPassword = async (req, res) => {
   try {
@@ -74,10 +70,15 @@ const forgetPassword = async (req, res) => {
     }
 
     // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otp = crypto.randomInt(100000, 999999).toString();
 
-    // Save OTP in the database or in memory cache for verification later
-    await user.update({ otp, timeExpire: Date.now() + 3600000 }); // OTP expires in 1 hour
+     // Hash the OTP
+     const hashedOTP = await bcrypt.hash(otp, 10);
+     const tme = new Date()
+     tme.setMinutes(tme.getMinutes()+10)
+
+
+    await user.update({ otp: hashedOTP, timeExpire: tme }); // OTP expires in 10 minutes
 
     // Generate reset password email using Mailgen
     const mailOptions = generateResetPasswordMail(email, otp);
@@ -92,19 +93,30 @@ const forgetPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
-    const { password, otp } = req.body;
+    const { email, password, otp } = req.body;
 
-    // Find user by OTP
-    const user = await userData.findOne({where: {otp} });
+    const user = await userData.findOne({ where: { email } });
 
     if (!user) {
-      return res.status(400).json({ error: "Invalid or expired OTP" });
+      return res.status(400).json({ error: "Invalid User" });
+    }
+    // Check if OTP matches
+    const otpMatch = await bcrypt.compare(otp, user.otp);
+    console.log(user.timeExpire);
+
+
+    // Check if OTP has expired
+    if (otpMatch && new Date() < user.timeExpire) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      console.log(hashedPassword);
+      await user.update({password: hashedPassword, otp: null,timeExpire: null});
+      return res.status(201).json({ message: "Password Reset Successfull" });
     }
 
     // Update user's password
-    await user.update({ password, otp: null, timeExpire: null });
+    
 
-    res.json({ message: "Password reset successfully" });
+    res.status(500).json({ error: "Invalid or Expired Otp" });
   } catch (error) {
     console.error("Error resetting password:", error);
     res.status(400).json({ error: "Failed to reset password" });

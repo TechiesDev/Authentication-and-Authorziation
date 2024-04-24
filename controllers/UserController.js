@@ -1,6 +1,13 @@
 const { where } = require("sequelize");
+const crypto = require("crypto");
 const userData = require("../model/UserModel.js");
 const jwt = require("jsonwebtoken");
+const {
+  isValidEmail,
+  isValidPassword,
+  isValidName,
+} = require("../validation/Validation.js");
+
 require("dotenv").config();
 const sk = process.env.SK;
 
@@ -8,12 +15,39 @@ const createToken = (user) => {
   return jwt.sign({ userId: user._id }, sk, { expiresIn: "1h" });
 };
 
+const hashPassword = (password) => {
+  return crypto.createHash("sha256").update(password).digest("hex");
+};
+
 const UserRegistration = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    const userregi = await userData.create({ name, email, password });
+    const hashedPassword = hashPassword(password);
+
+    // Validate email
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate password
+    if (!isValidPassword(password)) {
+      return res
+        .status(400)
+        .json({ error: "Password should have at least 8 characters" });
+    }
+
+    // Validate name
+    if (!isValidName(name)) {
+      return res.status(400).json({ error: "Invalid name format" });
+    }
+
+    const userregi = await userData.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
     const token = createToken(userregi);
-    res.cookie("token", token, { httpOnly: true }); // for apply cookies
+    res.cookie("token", token, { httpOnly: true });
     res
       .status(201)
       .json({ token, userregi, message: res.__("create-message") });
@@ -24,8 +58,22 @@ const UserRegistration = async (req, res) => {
 
 const UserLogin = async (req, res) => {
   const { email, password } = req.body;
+
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+
+  if (!isValidPassword(password)) {
+    return res
+      .status(400)
+      .json({ error: "Password should have at least 8 characters" });
+  }
+
+  const hashedPassword = hashPassword(password);
   try {
-    const user = await userData.findOne({ where: { email } });
+    const user = await userData.findOne({
+      where: { email, password: hashedPassword },
+    });
     if (user && user.password === password) {
       const token = createToken(user);
       res.cookie("token", token, { httpOnly: true });
@@ -79,4 +127,10 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = {UserRegistration,UserLogin,getUserById,updateUser,deleteUser};
+module.exports = {
+  UserRegistration,
+  UserLogin,
+  getUserById,
+  updateUser,
+  deleteUser,
+};
