@@ -3,6 +3,7 @@ const userRoutes = require("./routes/UserRoutes.js");
 const sequelize = require("./config/Sequlize.js");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const cronjobs = require('./cron/Cron.js');
 require("dotenv").config();
 const port = process.env.PORT;
 
@@ -19,9 +20,9 @@ const i18n = new I18n({
   defaultLocale: "en",
 });
 app.use(i18n.init);
-
 app.use(express.json());
 app.use("/", userRoutes);
+cronjobs;
 
 sequelize
   .sync()
@@ -31,7 +32,6 @@ sequelize
   .catch((error) => {
     console.error("Unable to connect to the database:", error);
   });
-
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
