@@ -26,24 +26,3 @@ const userData = sequelize.define('users', {
 });
 
 module.exports = userData;
-
-
-
-
-
-// const getToken = (req, res) => {
-//   try {
-//     const { token } = req.query;
-
-//     if (!token) {
-//       return res
-//         .status(400)
-//         .json({ error: "Token not found in query parameters" });
-//     }
-
-//     res.cookie("token", token, { httpOnly: true }).json({ message: "Now you can login" });
-//   } catch (error) {
-//     console.error("Error getting token:", error);
-//     res.status(500).json({ error: "Failed to get token" });
-//   }
-// };
