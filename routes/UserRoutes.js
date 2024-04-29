@@ -1,10 +1,13 @@
 const express = require("express");
 const userController = require("../controllers/UserController.js");
 const authorization = require("../middleware/Authorization.js");
-const router = express.Router();
+const {validator} = require("../middleware/Validator.js");
 const passwordController = require("../controllers/Forget&ResetController.js");
+const router = express.Router();
 
-router.post("/usersign", userController.UserRegistration);
+router.get('/',userController.homePage)
+
+router.post("/usersign",validator ,userController.UserRegistration);
 router.post("/login", userController.UserLogin);
 
 // Protected routes requiring authorization middleware
