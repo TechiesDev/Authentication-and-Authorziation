@@ -1,4 +1,5 @@
 const { where } = require("sequelize");
+const {validationResult} = require("express-validator")
 const userData = require("../model/UserModel.js");
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
@@ -11,12 +12,27 @@ const createToken = (user) => {
   return jwt.sign({ userId: user._id }, sk, { expiresIn: "1h" });
 };
 
+const homePage = async (req, res) => {
+  res.send({message: res.__("message")})
+}
+
 
 const UserRegistration = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0].msg });
+
+    }
+    const { name, email,phoneNumber, password } = req.body;
+
+    const existingUser = await userData.findOne({where:{ email }});
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already exists' });
+    };
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userregi = await userData.create({name,email,password: hashedPassword});
+    const userregi = await userData.create({name,email,phoneNumber,password: hashedPassword});
     const token = createToken(email);
     res.cookie("token", token, { httpOnly: true });
     res.status(201).json({ token, userregi, message: res.__("create-message") });
@@ -25,24 +41,30 @@ const UserRegistration = async (req, res) => {
   }
 };
 
+
 const UserLogin = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await userData.findOne({where: { email}});
-    if (!user) {
+    const user = await userData.findOne({ where: { email } });
+
+    if (!user) 
       return res.status(404).json({ error: "User not found" });
-    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if(!isPasswordValid) {
+
+    if (!isPasswordValid) 
       return res.status(400).json({ error: "Invalid Password" });
-    }
-      const token = createToken(user.email);
-      res.cookie("token", token, { httpOnly: true });
-      res.status(200).json({ token, user, message: res.__("login-message") });
+
+    const token = createToken(user.email);
+
+    res.cookie("token", token, { httpOnly: true });
+    res.status(200).json({ token, user, message: res.__("login-message") });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 const getUserById = async (req, res) => {
   try {
@@ -83,4 +105,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = {UserRegistration,UserLogin,getUserById,updateUser,deleteUser};
+module.exports = {homePage,UserRegistration,UserLogin,getUserById,updateUser,deleteUser};

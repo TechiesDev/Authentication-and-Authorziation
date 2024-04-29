@@ -1,9 +1,10 @@
 {
-    "MESSAGE":"English message",
-    "home":"This home our page",
-    "create-message":"This page create successfully",
-    "login-message":"Login page successfully",
-    "find-message":"find one message successfully",
-    "update-message":"This page update successfully",
-    "delete-message":"This page delete successfully"
+    "message":"This is our home page",
+    "create-message":"Student Registered Successfully",
+    "login-message":"Student Login Successfully",
+    "find-message":"Student Details",
+    "update-message":"Student Details Updated",
+    "delete-message":"Student deleted successfully",
+    "forget-message":"OTP sent successfully",
+    "reset-message":"Password Reset Successfull"
 }

@@ -70,7 +70,7 @@ const forgetPassword = async (req, res) => {
     // Generate reset password email using Mailgen
     const mailOptions = generateResetPasswordMail(email, otp);
     await sendMail(mailOptions);
-    res.json({ message: "OTP sent successfully" });
+    res.json({ message: res.__("forget-message") });
   } catch (error) {
     console.error("Error in forgetPassword:", error);
     res.status(500).json({ error: "Failed to send OTP" });
@@ -91,7 +91,7 @@ const resetPassword = async (req, res) => {
     if (otpMatch && new Date() < user.timeExpire) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await user.update({password: hashedPassword,otp: null,timeExpire: null});
-      return res.status(201).json({ message: "Password Reset Successfull" });
+      return res.status(201).json({ message: res.__("reset-message") });
     }
     res.status(500).json({ error: "Invalid or Expired OTP" });
   } catch (error) {
