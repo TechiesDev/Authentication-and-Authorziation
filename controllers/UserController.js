@@ -1,4 +1,4 @@
-const { where } = require("sequelize");
+const { where, DATE } = require("sequelize");
 const {validationResult} = require("express-validator")
 const userData = require("../model/UserModel.js");
 const jwt = require("jsonwebtoken");
@@ -32,7 +32,8 @@ const UserRegistration = async (req, res) => {
       return res.status(400).json({ error: 'Email already exists' });
     };
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userregi = await userData.create({name,email,phoneNumber,password: hashedPassword});
+    const id = Date.now().toString(10);
+    const userregi = await userData.create({id,name,email,phoneNumber,password: hashedPassword});
     const token = createToken(email);
     res.cookie("token", token, { httpOnly: true });
     res.status(201).json({ token, userregi, message: res.__("create-message") });
