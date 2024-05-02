@@ -1,10 +1,45 @@
 {
-    "message":"This is our home page",
-    "create-message":"Student Registered Successfully",
-    "login-message":"Student Login Successfully",
-    "find-message":"Student Details",
-    "update-message":"Student Details Updated",
-    "delete-message":"Student deleted successfully",
-    "forget-message":"OTP sent successfully",
-    "reset-message":"Password Reset Successfull"
+	"MESSAGE": "Hello",
+	"not_Found": "Not found on our API",
+	"signup": {
+		"username_exists": "Username already exists",
+		"signup_success": "User signup successful"
+	},
+	"signin": {
+		"invalid_credentials": "Invalid username or password",
+		"invalid_password": "Invalid password",
+		"signin_success": "Signin successful"
+	},
+	"forget": {
+		"invalid_user": "Invalid user",
+		"failed_send_otp": "Failed to send OTP",
+		"email_sent": "Email sent successfully"
+	},
+	"reset": {
+		"invalid_user": "Invalid user",
+		"incorrectOtp": "OTP provided is incorrect or expired",
+		"invlid_otp": "Invalid or expired OTP",
+		"paswrd_success": "Password successfully updated"
+	},
+	"validator": {
+		"name_empty": "Name should not be empty",
+		"invalid_email": "Must be a valid email address",
+		"short_password": "Password must be at least 6 characters long",
+		"invalid_otp_format": "OTP must be of 6 digits"
+	},
+	"getById": {
+		"user_not_found": "User not found",
+		"usr_success": "User found successfully"
+	},
+	"update": {
+		"user_not_found": "User not found",
+		"updated_success": "User updated successfully"
+	},
+	"delete": {
+		"user_not_found": "User not found",
+		"deleted_success": "User deleted successfully"
+	},
+	"signup.message1": "signup.message1",
+	"signup.error1": "signup.error1",
+	"message": "message"
 }

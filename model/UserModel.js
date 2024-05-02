@@ -1,12 +1,17 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/Sequlize.js');
+const {sequelize} = require('../config/Sequlize.js');
 
 const userData = sequelize.define('users', {
+
   id: {
     type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
     autoIncrement: false,
+  },
+  role: {
+    type: DataTypes.ENUM("admin","teacher","student"),
+    allowNull: false,
   },
   name: {
     type: DataTypes.STRING,

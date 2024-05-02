@@ -13,34 +13,47 @@ const createToken = (user) => {
 };
 
 const homePage = async (req, res) => {
-  res.send({message: res.__("message")})
+  res.send({message: res.__("MESSAGE")})
 }
 
 
 const UserRegistration = async (req, res) => {
   try {
+    const { role ,name, email, phoneNumber, password} = req.body;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array()[0].msg });
-
-    }
-    const { name, email,phoneNumber, password } = req.body;
-
-    const existingUser = await userData.findOne({where:{ email }});
+    const existingUser = await userData.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ error: 'Email already exists' });
-    };
+      return res.status(400).json({ error: res.__('signup.username_exists') });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const id = Date.now().toString(10);
-    const userregi = await userData.create({id,name,email,phoneNumber,password: hashedPassword});
+
+    let prefix = '';
+    switch (role) {
+      case 'admin':
+        prefix = 'adm';
+        break;
+      case 'teacher':
+        prefix = 'tch';
+        break;
+      case 'student':
+        prefix = 'std';
+        break;
+      default:
+        prefix = 'usr';
+        break;
+    }
+
+    const id = `${prefix}`+(Date.now().toString(10)); 
+    const userregi = await userData.create({ id, role,name, email, phoneNumber, password: hashedPassword });
     const token = createToken(email);
     res.cookie("token", token, { httpOnly: true });
-    res.status(201).json({ token, userregi, message: res.__("create-message") });
+    res.status(201).json({ token, userregi, message: res.__("signup.signup_success") });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 const UserLogin = async (req, res) => {
@@ -49,17 +62,17 @@ const UserLogin = async (req, res) => {
     const user = await userData.findOne({ where: { email } });
 
     if (!user) 
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: res.__('signin.invalid_credentials') });
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) 
-      return res.status(400).json({ error: "Invalid Password" });
+      return res.status(400).json({ error: res.__('signin.invalid_password') });
 
     const token = createToken(user.email);
 
     res.cookie("token", token, { httpOnly: true });
-    res.status(200).json({ token, user, message: res.__("login-message") });
+    res.status(200).json({ token, user, message: res.__("signin.signin_success") });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -70,9 +83,12 @@ const UserLogin = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const user = await userData.findByPk(req.params.id);
-    res.status(201).json({ user, message: res.__("find-message") });
+    if (!user) {
+      return res.status(404).json({ message: res.__('getById.user_not_found') });
+    }
+    res.status(201).json({ user,message: res.__('getById.usr_success') });
   } catch (error) {
-    res.status(500).json({error: error.message});
+    res.status(500).json({ error: error.message});
   }
 };
 
@@ -84,9 +100,9 @@ const updateUser = async (req, res) => {
       { where: { id: req.params.id } }
     );
     if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ message: res.__('update.user_not_found') });
     }
-    res.status(200).json({ updatedUser, message: res.__("update-message") });
+    res.status(200).json({ updatedUser, message: res.__('update.updated_success') });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -98,9 +114,9 @@ const deleteUser = async (req, res) => {
       where: { id: req.params.id },
     });
     if (!deletedUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ message: res.__('delete.user_not_found') });
     }
-    res.status(200).json({ message: res.__("delete-message") });
+    res.status(200).json({ message: res.__('delete.deleted_success') });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
